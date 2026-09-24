@@ -25,6 +25,14 @@ const (
 
 var AllDecisionType = []string{"release", "rework", "quarantine"}
 
+// ColorProofStatus groups the colour-proof states referenced by service rules.
+const (
+	ColorProofStatusCaptured = "captured"
+	ColorProofStatusReview   = "review"
+	ColorProofAccepted       = "accepted"
+	ColorProofRejected       = "rejected"
+)
+
 var PressUnitTransitions = map[string]map[string]bool{
 	"ready":       {"setup": true, "printing": true},
 	"setup":       {"printing": true, "maintenance": true, "ready": true},

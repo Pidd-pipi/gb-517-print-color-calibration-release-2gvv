@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { request } from '../api/client';
 import { roleAtLeast, useAuth } from '../hooks/useAuth';
 import { usePagination } from '../hooks/usePagination';
-import type { EntityConfig, DomainRecord } from '../types/domain';
+import type { EntityConfig, DomainRecord, RunReleaseResult } from '../types/domain';
 import type { RunState } from '../types/status';
 import type { EntityStore } from '../stores/factory';
 import { formatDate } from '../utils/format';
@@ -13,6 +13,7 @@ import { EmptyState } from './common/EmptyState';
 import { MetricCard } from './common/MetricCard';
 import { ConfirmDialog } from './common/ConfirmDialog';
 import { UiButton } from './common/UiButton';
+import { RunReleasePanel } from './RunReleasePanel';
 
 function decisionRunState(status: string): RunState {
   if (status === 'release') return 'released';
@@ -55,6 +56,13 @@ export function EntityPage({ config, useStore }: { config: EntityConfig; useStor
     try { setDetail((await request<DomainRecord>(`/${config.path}/${item.id}`)).data); }
     catch { setDetail(item); }
   };
+  const refreshDetail = async (id: number) => {
+    try { setDetail((await request<DomainRecord>(`/${config.path}/${id}`)).data); } catch { /* keep current detail */ }
+  };
+  const handleRunReleased = (result: RunReleaseResult) => {
+    void load(config.path, submittedSearch, page, pageSize);
+    void refreshDetail(result.run.id);
+  };
 
   return <main className="workspace">
     <header className="page-header"><div><p className="eyebrow">业务工作台</p><h1>{config.label}</h1><p>统一管理{config.label}的状态、风险、证据与责任人。</p></div>{canWrite && <UiButton onClick={() => setShowCreate(true)}>新增{config.label}</UiButton>}</header>
@@ -69,6 +77,6 @@ export function EntityPage({ config, useStore }: { config: EntityConfig; useStor
     <footer className="pagination"><button onClick={previous} disabled={page <= 1}>上一页</button><span>第 {page} / {pages} 页</span><button onClick={next} disabled={page >= pages}>下一页</button></footer>
     <ConfirmDialog open={showCreate} title={`新增${config.label}`} onCancel={() => setShowCreate(false)} onConfirm={() => void createDemo()}><p>将创建一条包含完整责任人、风险和证据信息的演示记录。</p></ConfirmDialog>
     <ConfirmDialog open={Boolean(pending)} title="确认状态迁移" onCancel={() => setPending(null)} onConfirm={() => { if (pending) void transition(config.path, pending.item, pending.status).then(() => setPending(null)); }}><p>状态迁移会写入审计日志；色彩配置和放行决定同时生成不可变版本。</p><strong>{pending?.item.status} → {pending?.status}</strong></ConfirmDialog>
-    <ConfirmDialog open={Boolean(detail)} title={`${detail?.code || ''} 记录详情`} onCancel={() => setDetail(null)} onConfirm={() => setDetail(null)}>{detail && <div className="detail-content"><p>{detail.description}</p><dl><div><dt>证据</dt><dd>{detail.evidence || '-'}</dd></div><div><dt>当前版本</dt><dd>v{detail.version}</dd></div></dl><ColorTable records={[detail]} title="记录色彩读数" />{detail.revisions?.length ? <div className="revision-list"><h3>版本链</h3>{detail.revisions.map((revision) => <article key={revision.id}><strong>v{revision.version} · {revision.status}</strong><span>{revision.actor} · {revision.reason}</span><code>{revision.requestId}</code></article>)}</div> : null}</div>}</ConfirmDialog>
+    <ConfirmDialog open={Boolean(detail)} title={`${detail?.code || ''} 记录详情`} onCancel={() => setDetail(null)} onConfirm={() => setDetail(null)}>{detail && <div className="detail-content"><p>{detail.description}</p><dl><div><dt>证据</dt><dd>{detail.evidence || '-'}</dd></div><div><dt>当前版本</dt><dd>v{detail.version}</dd></div></dl><ColorTable records={[detail]} title="记录色彩读数" />{config.key === 'printRun' && canReview && <RunReleasePanel run={detail} onReleased={handleRunReleased} />}{detail.revisions?.length ? <div className="revision-list"><h3>版本链</h3>{detail.revisions.map((revision) => <article key={revision.id}><strong>v{revision.version} · {revision.status}</strong><span>{revision.actor} · {revision.reason}</span><code>{revision.requestId}</code></article>)}</div> : null}</div>}</ConfirmDialog>
   </main>;
 }

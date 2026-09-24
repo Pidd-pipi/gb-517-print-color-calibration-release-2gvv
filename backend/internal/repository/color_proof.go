@@ -12,6 +12,7 @@ import (
 type ColorProofRepository interface {
 	List(context.Context, dto.PageQuery) (Page[model.ColorProof], error)
 	Get(context.Context, uint) (model.ColorProof, error)
+	FindByCodes(context.Context, []string) ([]model.ColorProof, error)
 	Create(context.Context, *model.ColorProof) error
 	Update(context.Context, uint, uint, *model.ColorProof) error
 	Delete(context.Context, uint) error
@@ -31,6 +32,14 @@ func (r *colorProofRepository) List(ctx context.Context, q dto.PageQuery) (Page[
 }
 func (r *colorProofRepository) Get(ctx context.Context, id uint) (model.ColorProof, error) {
 	return r.store.Get(ctx, id)
+}
+func (r *colorProofRepository) FindByCodes(ctx context.Context, codes []string) ([]model.ColorProof, error) {
+	items := make([]model.ColorProof, 0, len(codes))
+	if len(codes) == 0 {
+		return items, nil
+	}
+	err := r.store.db.WithContext(ctx).Where("code IN ?", codes).Find(&items).Error
+	return items, err
 }
 func (r *colorProofRepository) Create(ctx context.Context, item *model.ColorProof) error {
 	return r.store.Create(ctx, item)

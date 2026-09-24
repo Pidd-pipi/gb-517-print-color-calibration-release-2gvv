@@ -26,7 +26,28 @@ export interface RevisionRecord {
 }
 
 export interface PageMeta { page: number; pageSize: number; total: number }
-export interface ApiEnvelope<T> { data: T; error?: string; message?: string; meta?: PageMeta }
+export interface ApiEnvelope<T> { data: T; error?: string; message?: string; meta?: PageMeta; details?: ReleaseErrorDetails }
+export interface ProofIssue { code: string; reason: string }
+export interface ReleaseErrorDetails { proofIssues?: ProofIssue[] }
+export interface RunReleaseInput {
+  expectedVersion: number;
+  proofCodes: string[];
+  reason: string;
+  decisionCode?: string;
+}
+export interface RunReleaseResult {
+  run: DomainRecord;
+  releaseDecision: DomainRecord;
+  verifiedProofs: string[];
+}
+export class ApiRequestError extends Error {
+  details?: ReleaseErrorDetails;
+  constructor(message: string, details?: ReleaseErrorDetails) {
+    super(message);
+    this.name = 'ApiRequestError';
+    this.details = details;
+  }
+}
 export interface UserSession { token: string; username: string; displayName: string; role: string; expiresIn: number }
 export interface AuditLog {
   id: number; requestId: string; actor: string; action: string; entityType: string;

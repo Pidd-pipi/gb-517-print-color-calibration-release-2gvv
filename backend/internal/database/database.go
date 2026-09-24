@@ -202,17 +202,27 @@ func seedColorProof(ctx context.Context, db *gorm.DB) error {
 		{BaseModel: model.BaseModel{Code: "CP-001", Name: "色彩校样示例一", Status: "captured", Version: 1,
 			Description: "用于启动验证和主要流程演示的色彩校样记录"}, Facility: "印刷色彩批次校准放行区域1", Owner: "运行一组",
 			Category: "常规", RiskLevel: "low", MetricValue: 12.5, MetricUnit: "unit",
-			EffectiveAt: now.Add(0 * time.Hour), Evidence: "已完成基础证据核对", RelatedCode: "REL-517-01"},
+			EffectiveAt: now.Add(0 * time.Hour), Evidence: "已完成基础证据核对", RelatedCode: "PR-001"},
 
 		{BaseModel: model.BaseModel{Code: "CP-002", Name: "色彩校样示例二", Status: "review", Version: 1,
 			Description: "用于启动验证和主要流程演示的色彩校样记录"}, Facility: "印刷色彩批次校准放行区域2", Owner: "质量复核组",
 			Category: "重点", RiskLevel: "medium", MetricValue: 25.0, MetricUnit: "%",
-			EffectiveAt: now.Add(3 * time.Hour), Evidence: "已完成基础证据核对", RelatedCode: "REL-517-02"},
+			EffectiveAt: now.Add(3 * time.Hour), Evidence: "已完成基础证据核对", RelatedCode: "PR-002"},
 
 		{BaseModel: model.BaseModel{Code: "CP-003", Name: "色彩校样示例三", Status: "accepted", Version: 1,
 			Description: "用于启动验证和主要流程演示的色彩校样记录"}, Facility: "印刷色彩批次校准放行区域3", Owner: "安全主管组",
 			Category: "复核", RiskLevel: "high", MetricValue: 37.5, MetricUnit: "score",
-			EffectiveAt: now.Add(6 * time.Hour), Evidence: "已完成基础证据核对", RelatedCode: "REL-517-03"},
+			EffectiveAt: now.Add(6 * time.Hour), Evidence: "已完成基础证据核对", RelatedCode: "PR-003"},
+
+		{BaseModel: model.BaseModel{Code: "CP-004", Name: "色彩校样示例四", Status: "accepted", Version: 1,
+			Description: "批次 PR-003 的第二份复核校样"}, Facility: "印刷色彩批次校准放行区域3", Owner: "质量复核组",
+			Category: "复核", RiskLevel: "medium", MetricValue: 21.0, MetricUnit: "%",
+			EffectiveAt: now.Add(7 * time.Hour), Evidence: "分光密度仪二次读数已复核", RelatedCode: "PR-003"},
+
+		{BaseModel: model.BaseModel{Code: "CP-005", Name: "色彩校样示例五", Status: "accepted", Version: 1,
+			Description: "来源与所选批次不一致的已接收校样，用于演示来源拦截"}, Facility: "印刷色彩批次校准放行区域2", Owner: "质量复核组",
+			Category: "复核", RiskLevel: "low", MetricValue: 18.2, MetricUnit: "%",
+			EffectiveAt: now.Add(8 * time.Hour), Evidence: "已接收但关联到其他批次", RelatedCode: "PR-002"},
 	}
 	return db.WithContext(ctx).Create(&items).Error
 }
