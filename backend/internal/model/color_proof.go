@@ -23,3 +23,7 @@ func (item *ColorProof) GetBase() *BaseModel { return &item.BaseModel }
 func (item ColorProof) TableName() string { return "color_proofs" }
 
 var ColorProofInitialStatus = "captured"
+
+// ColorProofAcceptedStatus marks a proof whose readings have been received by
+// a reviewer; only proofs in this state may back a batch release.
+var ColorProofAcceptedStatus = "accepted"

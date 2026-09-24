@@ -98,6 +98,11 @@ func (s *printRunService) Transition(ctx context.Context, id uint, input dto.Tra
 	if (target == string(constants.RunStateReleased) || current.Status == string(constants.RunStateReleased)) && !canReview(role) {
 		return model.PrintRun{}, ErrForbidden
 	}
+	if target == string(constants.RunStateReleased) {
+		// A run can only be released from the detail flow that verifies every
+		// adopted proof is accepted and linked to this run.
+		return model.PrintRun{}, ErrCheckedRelease
+	}
 	if !constants.CanTransition(constants.PrintRunTransitions, current.Status, target) {
 		return model.PrintRun{}, fmt.Errorf("%w: %s -> %s", ErrInvalidTransition, current.Status, target)
 	}

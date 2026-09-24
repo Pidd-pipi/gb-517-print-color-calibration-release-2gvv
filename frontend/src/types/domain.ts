@@ -33,3 +33,30 @@ export interface AuditLog {
   entityId: number; beforeState: string; afterState: string; detail: string; createdAt: string;
 }
 export interface EntityConfig { key: string; path: string; label: string; statuses: readonly string[] }
+
+export interface ProofCheck {
+  code: string;
+  name?: string;
+  status?: string;
+  runCode?: string;
+  accepted: boolean;
+  issue?: 'missing' | 'not_accepted' | 'wrong_run' | 'duplicated';
+  message?: string;
+}
+
+export interface BatchReleaseCheck {
+  runId: number;
+  runCode: string;
+  runStatus: string;
+  targetStatus: string;
+  transitionValid: boolean;
+  transitionIssue?: string;
+  proofs: ProofCheck[];
+  ready: boolean;
+}
+
+export interface BatchReleaseOutcome {
+  run: DomainRecord;
+  decision: DomainRecord;
+  proofs: DomainRecord[];
+}

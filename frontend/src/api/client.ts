@@ -22,6 +22,11 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
   if (response.status === 204) return { data: undefined as T };
   const payload = await response.json().catch(() => ({ error: 'invalid_response', message: '服务返回了无法解析的响应' }));
   if (response.status === 401) clearSession();
-  if (!response.ok) throw new Error(payload.message || payload.error || `HTTP ${response.status}`);
+  if (!response.ok) {
+    const apiError = new Error(payload.message || payload.error || `HTTP ${response.status}`) as Error & { status?: number; payload?: unknown };
+    apiError.status = response.status;
+    apiError.payload = payload;
+    throw apiError;
+  }
   return payload as ApiEnvelope<T>;
 }

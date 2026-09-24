@@ -32,14 +32,17 @@ func New(cfg config.Config, db *gorm.DB, redisClient *redis.Client, logger *slog
 	printRunRepository := repository.NewPrintRunRepository(db)
 	colorProofRepository := repository.NewColorProofRepository(db)
 	releaseDecisionRepository := repository.NewReleaseDecisionRepository(db)
+	batchReleaseRepository := repository.NewBatchReleaseRepository(db)
 	pressUnitService := service.NewPressUnitService(pressUnitRepository, securityService)
 	printRunService := service.NewPrintRunService(printRunRepository, securityService)
 	colorProofService := service.NewColorProofService(colorProofRepository, securityService)
 	releaseDecisionService := service.NewReleaseDecisionService(releaseDecisionRepository, securityService)
+	batchReleaseService := service.NewBatchReleaseService(printRunRepository, colorProofRepository, batchReleaseRepository, securityService)
 	pressUnitHandler := handler.NewPressUnitHandler(pressUnitService)
 	printRunHandler := handler.NewPrintRunHandler(printRunService)
 	colorProofHandler := handler.NewColorProofHandler(colorProofService)
 	releaseDecisionHandler := handler.NewReleaseDecisionHandler(releaseDecisionService)
+	batchReleaseHandler := handler.NewBatchReleaseHandler(batchReleaseService)
 	systemHandler := handler.NewSystemHandler(securityService, pressUnitService, printRunService, colorProofService, releaseDecisionService, db, redisClient)
 
 	engine.GET("/healthz", systemHandler.Health)
@@ -58,6 +61,7 @@ func New(cfg config.Config, db *gorm.DB, redisClient *redis.Client, logger *slog
 	printRunHandler.Register(api)
 	colorProofHandler.Register(api)
 	releaseDecisionHandler.Register(api)
+	batchReleaseHandler.Register(api)
 
 	engine.NoRoute(func(c *gin.Context) {
 		if c.Request.Method == http.MethodOptions {

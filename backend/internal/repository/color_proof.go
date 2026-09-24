@@ -12,6 +12,8 @@ import (
 type ColorProofRepository interface {
 	List(context.Context, dto.PageQuery) (Page[model.ColorProof], error)
 	Get(context.Context, uint) (model.ColorProof, error)
+	ListByCodes(context.Context, []string) ([]model.ColorProof, error)
+	ListByRunCode(context.Context, string) ([]model.ColorProof, error)
 	Create(context.Context, *model.ColorProof) error
 	Update(context.Context, uint, uint, *model.ColorProof) error
 	Delete(context.Context, uint) error
@@ -31,6 +33,21 @@ func (r *colorProofRepository) List(ctx context.Context, q dto.PageQuery) (Page[
 }
 func (r *colorProofRepository) Get(ctx context.Context, id uint) (model.ColorProof, error) {
 	return r.store.Get(ctx, id)
+}
+func (r *colorProofRepository) ListByCodes(ctx context.Context, codes []string) ([]model.ColorProof, error) {
+	items := make([]model.ColorProof, 0)
+	if len(codes) == 0 {
+		return items, nil
+	}
+	err := r.store.db.WithContext(ctx).Where("code IN ?", codes).Find(&items).Error
+	return items, err
+}
+func (r *colorProofRepository) ListByRunCode(ctx context.Context, runCode string) ([]model.ColorProof, error) {
+	items := make([]model.ColorProof, 0)
+	err := r.store.db.WithContext(ctx).
+		Where("related_code = ?", runCode).
+		Order("code ASC").Find(&items).Error
+	return items, err
 }
 func (r *colorProofRepository) Create(ctx context.Context, item *model.ColorProof) error {
 	return r.store.Create(ctx, item)
